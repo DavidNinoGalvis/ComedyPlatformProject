@@ -1,11 +1,12 @@
 import streamlit as st
-#from model import Event
 from streamlit_option_menu import option_menu
 import json
 from streamlit_lottie import st_lottie
+from datetime import datetime
 
+# Clase Event para almacenar información de eventos
 class Event:
-    def __init__(self, name, artist_list, place,date,opening_event_time, direccion,city):
+    def __init__(self, name, artist_list, place, date, opening_event_time, direccion, city):
         self.event_name = name
         self.artist = artist_list
         self.event_place = place
@@ -13,6 +14,9 @@ class Event:
         self.opening_time = opening_event_time
         self.direccion_event = direccion
         self.event_city = city
+
+# Lista global para almacenar eventos
+event_list = []
 
 # Función para manejar el inicio de sesión
 def login():
@@ -36,7 +40,7 @@ def login():
 # Interfaz de la página de inicio de sesión
 def draw_login_page():
     st.title("Inicio de Sesión")
-    with st.form(key="login_form1"):
+    with st.form(key="login_form"):
         username = st.text_input("Usuario", key="username_login")
         password = st.text_input("Contraseña", type="password", key="password_login")
         login_button = st.form_submit_button("Iniciar sesión")
@@ -45,6 +49,7 @@ def draw_login_page():
             st.session_state['password'] = password
             login()
 
+# Función para crear eventos
 def create_event_ui():
     with st.form("event_form"):
         name = st.text_input("Nombre del evento")
@@ -59,9 +64,35 @@ def create_event_ui():
         if submit_button:
             artist_list = artist_list.split(",")  # Convertir la cadena de artistas en una lista
             event = Event(name, artist_list, place, date, opening_event_time, direccion, city)
+            event_list.append(event)  # Guardar el evento en la lista global
             st.success(f"Evento '{event.event_name}' creado exitosamente!")
 
-# Interfaz de la página del admin
+# Función para buscar eventos
+def search_event_ui():
+    st.write("Buscar un evento por nombre:")
+    search_name = st.text_input("Nombre del evento a buscar")
+    search_button = st.button("Buscar")
+
+    if search_button:
+        found_events = [event for event in event_list if search_name.lower() in event.event_name.lower()]
+        if found_events:
+            st.write(f"Se encontraron {len(found_events)} eventos:")
+            for event in found_events:
+                st.write(f"Nombre: {event.event_name}, Lugar: {event.event_place}, Fecha: {event.event_date}")
+        else:
+            st.error("No se encontraron eventos con ese nombre.")
+
+# Función para el saludo condicional según la hora
+def saludo_condicional():
+    hora_actual = datetime.now().hour
+    if hora_actual < 12:
+        return "Buenos días: El Show de Gonzorisas"
+    elif 12 <= hora_actual < 18:
+        return "Buenas tardes: El Show de Gonzorisas"
+    else:
+        return "Buenas noches: El Show de Gonzorisas"
+
+# Función para la página del administrador
 def draw_admin_page():
     if st.session_state['user_role'] == 'admin':
         st.title("Bienvenido, Admin")
@@ -79,8 +110,6 @@ def draw_admin_page():
             st.session_state['username'] = ''
             st.session_state['password'] = ''
             st.session_state['user_role'] = None
-
-
 
 # Función principal que controla el flujo de la aplicación
 def main_admin():
@@ -115,55 +144,37 @@ def lottieImage():
         key=None,
     )
 
+# Función para la página de inicio
+def draw_home_page():
+    st.write("Bienvenidos al show de Gonzorisas")
+    col1, col2 = st.columns(2)
+    with col1:
+        lottieImage()
+    with col2:
+        st.write("""
+        ## Bienvenido a mi página
+        Aquí puedes encontrar información sobre eventos, subir archivos, gestionar tareas y configurar ajustes.
+        """)
 
-def draw_menu_page(selected):
+# Función para gestionar el contenido de las páginas
+def manage_content_page(selected):
     st.title(f"Pagina de {selected}")
-    st.write(f"Pagina {selected}")
+    st.info(saludo_condicional())
     if selected == "Inicio":
-        st.write("Bienvenidos al show de Gonzorisas")
-        col1, col2 = st.columns(2)
-        with col1:
-            lottieImage()
-        with col2:
-            st.write("""
-            ## Bienvenido a mi página
-            Aquí puedes encontrar información sobre eventos, subir archivos, gestionar tareas y configurar ajustes.
-            """)
+        draw_home_page()
     elif selected == "Crear Evento":
-        st.write("Complete el siguiente formulario para crear un nuevo evento:")
-        
-        # Crear un formulario para ingresar los datos del evento
-        with st.form("create_event_form"):
-            event_name = st.text_input("Nombre del evento")
-            artist_list = st.text_input("Artistas (separados por comas)")
-            place = st.text_input("Lugar del evento")
-            date = st.date_input("Fecha del evento")
-            opening_event_time = st.time_input("Hora de apertura del evento")
-            direccion = st.text_input("Dirección")
-            city = st.text_input("Ciudad")
-            
-            # Botón para enviar el formulario
-            submitted = st.form_submit_button("Crear Evento")
-            
-            if submitted:
-                # Convertir la lista de artistas en una lista de strings
-                artist_list = artist_list.split(',')
-                # Crear una instancia del evento
-                new_event = Event(event_name, artist_list, place, date, opening_event_time, direccion, city)
-                st.success(f"Evento '{new_event.event_name}' creado con éxito!")
-                st.write(f"Detalles del evento:\nNombre: {new_event.event_name}\nArtistas: {', '.join(new_event.artist)}\nLugar: {new_event.event_place}\nFecha: {new_event.event_date}\nHora de apertura: {new_event.opening_time}\nDirección: {new_event.direccion_event}\nCiudad: {new_event.event_city}")
+        create_event_ui()
+    elif selected == "Buscar Evento":
+        search_event_ui()
+    elif selected == "Reportes":
+        st.write("Página de Reportes")
 
-
-
+# Función principal para manejar las páginas de eventos
 def main_event_page():
-    draw_event_page()
-
-def draw_event_page():
     selected = option_menu(None, ["Inicio", "Crear Evento", "Buscar Evento", 'Reportes'], 
         icons=['house', 'cloud-upload', "list-task", 'gear'], 
-        menu_icon="cast", default_index=0, orientation="horizontal")
-    selected
-    draw_menu_page(selected)
+        menu_icon="cast", default_index=0, orientation="horizontal", key="main-menu")
+    manage_content_page(selected)
 
-
-        
+if __name__ == "__main__":
+    main_event_page()

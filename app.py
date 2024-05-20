@@ -5,7 +5,6 @@ from controllers.gui_controler import GUIController
 
 st.set_page_config(page_title="El Show de Gonzorisas",
                    page_icon="🤣")
-                   #layout="wide")
 
 if __name__ == "__main__":
     gui = GUIController()
