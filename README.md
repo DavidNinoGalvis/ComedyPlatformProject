@@ -2,6 +2,8 @@
 # Proyecto Final Programación Orientada a Objetos
 # Proyecto Website Comediantes
 
+![Logo Proyecto Principal](docs/logo_main.webp)
+
 ##### Integrantes:
 - Juan David Niño Galvis
 - Juan David Tabares
@@ -13,11 +15,13 @@ Para la creación del logo para nuestra plataforma de comedia utilizamos una int
 ##### Librerias Utilizadas
 
 - streamlit-Lottie:
+- Font Awesome and Boostrap icons
 
 Esta la utilizamos para mejorar la estetica del proyecto, esta funciona como un banco de diseños y animaciones para llamar facilemente mientras desarrollamos
 
 ## Objetivos Planteados
 
+- New: Agregar Distintas excepciones
 - Vista de Usuario
 - Dashboard para Administrador
 - Vista de Login para identificar el usuario o Administrador

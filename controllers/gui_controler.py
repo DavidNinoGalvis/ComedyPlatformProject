@@ -1,6 +1,5 @@
 from controllers.gestion_controler import  GestionController
-from view.main_view import main_admin
-from view.main_view import main_event_page
+from view.main_view import draw_main_view
 
 class GUIController:
     def __init__(self):
@@ -11,4 +10,4 @@ class GUIController:
     def main(self):
         if self.run_page == 'main':
             #main_admin()
-            main_event_page()
+            draw_main_view()

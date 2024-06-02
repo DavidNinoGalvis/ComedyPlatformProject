@@ -1,6 +1,6 @@
 from model.Event import Event
 
 class EventBar(Event):
-    def __init__(self, event_name, artist_name, event_place,event_date,opening_event_time, direccion_event,event_city,payment) -> None:
-        super().__init__(event_name, artist_name, event_place,event_date,opening_event_time, direccion_event,event_city)
-        self.artist_payment = payment
+    def __init__(self, name, address, date, opening_time, place_name, city, ticket_office, artist_list=None):
+        super().__init__(name, address, date, opening_time, place_name, city, ticket_office, artist_list)
+        self.artist_payment = None

@@ -1,3 +1,5 @@
+# Prototipo de DashboardManager, aun no creo que se use
+
 class DashboardManager:
     def __init__(self):
         self.data = {}

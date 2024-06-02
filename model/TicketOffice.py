@@ -1,5 +1,3 @@
-# Implementacion de la Clase TicketsOffice la cual almacenará diversos objetos de la clase Ticket
-
 class TicketOffice:
     def __init__(self):
         self.soldTickets = 0
