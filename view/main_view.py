@@ -1,16 +1,18 @@
 import streamlit as st
 import hydralit_components as hc
 from streamlit_calendar import calendar # Biblioteca Necesaria para representar en calendario
-from datetime import datetime
+from datetime import datetime, timedelta
 from controllers.gestion_controler import GestionController
 import time
 
 # Clase que almacenara la informacion totales
 gestion_controller = GestionController()
 
-gestion_controller.create_event("Evento Bar", "Evento de Comedia", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y")
-gestion_controller.create_event("Evento Filantropico", "Evento de Música", "Dirección 2", "2024-07-15", "19:00", "Teatro Z", "Ciudad W")
-gestion_controller.create_event("Evento Teatro", "Evento Deportivo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B")
+gestion_controller.create_event("Evento Bar", "Remate de Fin de año", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y", "ticket office")
+# Ejemplo de evento para la sustentación
+test = gestion_controller.create_event("Evento Filantropico", "Ultimatum de Comedia", "Dirección 2", "2024-06-23", "19:00", "Teatro Z", "Ciudad W", "ticket office")
+gestion_controller.create_event("Evento Teatro", "Fucks News Noticreo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B", "ticket office")
+
 
 calendar_events = [
     {
@@ -20,10 +22,10 @@ calendar_events = [
         "resourceId": "a",
     },
     {
-        "title": "Event 2",
-        "start": "2023-07-31T07:30:00",
-        "end": "2023-07-31T10:30:00",
-        "resourceId": "b",
+        "title": "Testeo de Evento",
+        "start": "2024-06-29T08:30:00",
+        "end": "2024-06-29T08:31:00",
+        "resourceId": "a",
     },
     {
         "title": "Event 3",
@@ -32,6 +34,25 @@ calendar_events = [
         "resourceId": "a",
     }
 ]
+
+def add_event_to_calendar_format(event):
+    # Convertir la fecha y la hora de inicio a un formato datetime
+    start_datetime = datetime.strptime(f"{event.event_date} {event.opening_time}", "%Y-%m-%d %H:%M")
+    
+    # Asumiendo una duración de 1 hora para el evento
+    end_datetime = start_datetime + timedelta(hours=2)
+    
+    # Crear el diccionario en el formato requerido
+    calendar_event = {
+        "title": event.event_name,
+        "start": start_datetime.isoformat(),
+        "end": end_datetime.isoformat(),
+        "resourceId": "a",  # Ajusta esto según sea necesario
+    }
+    calendar_events.append(calendar_event)
+
+add_event_to_calendar_format(test)
+
 # --------------------------------------------------------------------------------------------------------------------
 # Seccion para Comprar un Ticket como usuario
 def draw_buy_ticket_page():
@@ -101,6 +122,7 @@ def draw_create_event_page():
             # Crear el evento usando el controlador
             #try:
             event = gestion_controller.create_event(option_event, name, address, date, opening_time, place_name, city, ticket_price)
+            add_event_to_calendar_format(event)
             loader_placeholder.empty()
             form_placeholder.empty()
             with form_placeholder.container():
@@ -140,12 +162,12 @@ def draw_modify_event_page():
 
 def modify_event_form(event, event_type, event_name):
     # Campos de entrada para modificar el evento
-    new_name = st.text_input("Nombre:", value=event.name)
-    new_date = st.date_input("Fecha:", value=datetime.strptime(event.date, "%Y-%m-%d"))
-    new_address = st.text_input("Dirección:", value=event.address)
+    new_name = st.text_input("Nombre:", value=event.event_name)
+    new_date = st.date_input("Fecha:", value=datetime.strptime(event.event_date, "%Y-%m-%d"))
+    new_address = st.text_input("Dirección:", value=event.event_address)
     new_opening_time = st.text_input("Hora de Apertura:", value=event.opening_time)
     new_place_name = st.text_input("Nombre del Lugar:", value=event.place_name)
-    new_city = st.text_input("Ciudad:", value=event.city)
+    new_city = st.text_input("Ciudad:", value=event.event_city)
     new_description = st.text_area("Descripción:", value=event.description if hasattr(event, 'description') else "")
     
     if st.button("Guardar cambios"):
@@ -179,13 +201,13 @@ def draw_view_all_events_page():
     st.title("Todos los Eventos")
     
     def display_event(event):
-        st.subheader(event.name)
+        st.subheader(event.event_name)
         st.write(f"**Tipo de Evento:** {event.__class__.__name__}")
-        st.write(f"**Dirección:** {event.address}")
-        st.write(f"**Fecha:** {event.date}")
+        st.write(f"**Dirección:** {event.event_address}")
+        st.write(f"**Fecha:** {event.event_date}")
         st.write(f"**Hora de Apertura:** {event.opening_time}")
         st.write(f"**Nombre del Establecimiento:** {event.place_name}")
-        st.write(f"**Ciudad:** {event.city}")
+        st.write(f"**Ciudad:** {event.event_city}")
         #st.write(f"**Capacidad Máxima:** {event.ticket_office.capacity}")
         #st.write(f"**Precio del Ticket:** {event.ticket_office.price:.2f}")
         st.write("---")
@@ -366,7 +388,8 @@ def draw_main_view():
         {'icon': "fa fa-calendar-alt", 'label': "Consultar Evento"},
         {'icon': "fa fa-plus-circle", 'label': "Crear Evento"},
         {'icon': "fa fa-edit", 'label': "Modificar Evento"},
-        {'icon': "fa fa-chart-line", 'label': "Consultar Reportes"}
+        {'icon': "fa fa-chart-line", 'label': "Consultar Reportes"},
+        {'icon': "fa fa-chart-line", 'label': "Test - Events"}
     ]
 
     # Configurar el tema de la barra de navegación
@@ -394,4 +417,6 @@ def draw_main_view():
     elif (menu_id == "Modificar Evento"):
         draw_modify_event_page()
     elif (menu_id == "Consultar Reportes"):
+        pass
+    elif (menu_id == "Test - Events"):
         draw_view_all_events_page()
