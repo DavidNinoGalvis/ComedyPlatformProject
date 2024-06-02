@@ -1,5 +1,5 @@
 class Event:
-    def __init__(self, name, address, date, opening_time, place_name, city, ticket_office, artist_list=None):
+    def __init__(self, name, address, date, opening_time, place_name, city, rating, ticket_office, artist_list=None):
         self.event_name = name
         self.event_address = address
         self.event_date = date
@@ -7,7 +7,9 @@ class Event:
         self.place_name = place_name
         self.event_city = city
         self.ticket_office = ticket_office
+        self.rating = rating
         self.artist_list = artist_list if artist_list is not None else []
+
 
     def add_artist(self, artist):
         self.artist_list.append(artist)

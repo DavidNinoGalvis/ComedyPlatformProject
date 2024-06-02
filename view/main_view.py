@@ -4,14 +4,15 @@ from streamlit_calendar import calendar # Biblioteca Necesaria para representar 
 from datetime import datetime, timedelta
 from controllers.gestion_controler import GestionController
 import time
+from streamlit_star_rating import st_star_rating
 
 # Clase que almacenara la informacion totales
 gestion_controller = GestionController()
 
-gestion_controller.create_event("Evento Bar", "Remate de Fin de año", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y", "ticket office")
+gestion_controller.create_event("Evento Bar", "Remate de Fin de año", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y",4 ,"ticket office")
 # Ejemplo de evento para la sustentación
-test = gestion_controller.create_event("Evento Filantropico", "Ultimatum de Comedia", "Dirección 2", "2024-06-23", "19:00", "Teatro Z", "Ciudad W", "ticket office")
-gestion_controller.create_event("Evento Teatro", "Fucks News Noticreo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B", "ticket office")
+test = gestion_controller.create_event("Evento Filantropico", "Ultimatum de Comedia", "Dirección 2", "2024-06-23", "19:00", "Teatro Z", "Ciudad W", 5, "ticket office")
+gestion_controller.create_event("Evento Teatro", "Fucks News Noticreo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B", 2, "ticket office")
 
 
 calendar_events = [
@@ -36,11 +37,10 @@ calendar_events = [
 ]
 
 def add_event_to_calendar_format(event):
-    # Convertir la fecha y la hora de inicio a un formato datetime
     start_datetime = datetime.strptime(f"{event.event_date} {event.opening_time}", "%Y-%m-%d %H:%M")
     
     # Asumiendo una duración de 1 hora para el evento
-    end_datetime = start_datetime + timedelta(hours=2)
+    end_datetime = start_datetime + timedelta(hours=1)
     
     # Crear el diccionario en el formato requerido
     calendar_event = {
@@ -104,7 +104,7 @@ def draw_create_event_page():
         city = st.text_input("Ciudad del Evento", placeholder="Enter event city")
         capacity = st.number_input("Capacidad Maxima", min_value=0)
         ticket_price = st.number_input("Precio de Ticket", min_value=0.0, format="%.2f")
-        
+        rating = st_star_rating(label = "Calidad del Evento", maxValue = 5, defaultValue = 3, key = "rating", dark_theme = True )
         submit_button = st.form_submit_button("Create Event")
 
 
@@ -121,8 +121,8 @@ def draw_create_event_page():
             
             # Crear el evento usando el controlador
             #try:
-            event = gestion_controller.create_event(option_event, name, address, date, opening_time, place_name, city, ticket_price)
-            add_event_to_calendar_format(event)
+            event = gestion_controller.create_event(option_event, name, address, date, opening_time, place_name, city, ticket_price, rating)
+            #add_event_to_calendar_format(event)
             loader_placeholder.empty()
             form_placeholder.empty()
             with form_placeholder.container():
@@ -161,25 +161,35 @@ def draw_modify_event_page():
                 modify_event_form(event, event_type, event_name)
 
 def modify_event_form(event, event_type, event_name):
+    # Verificar y convertir event_date a datetime.date si es necesario
+    if isinstance(event.event_date, str):
+        event_date = datetime.strptime(event.event_date, "%Y-%m-%d").date()
+    elif isinstance(event.event_date, datetime):
+        event_date = event.event_date.date()
+    else:
+        event_date = event.event_date
+    
     # Campos de entrada para modificar el evento
     new_name = st.text_input("Nombre:", value=event.event_name)
-    new_date = st.date_input("Fecha:", value=datetime.strptime(event.event_date, "%Y-%m-%d"))
+    new_date = st.date_input("Fecha:", value=event_date)
     new_address = st.text_input("Dirección:", value=event.event_address)
     new_opening_time = st.text_input("Hora de Apertura:", value=event.opening_time)
     new_place_name = st.text_input("Nombre del Lugar:", value=event.place_name)
     new_city = st.text_input("Ciudad:", value=event.event_city)
     new_description = st.text_area("Descripción:", value=event.description if hasattr(event, 'description') else "")
+    new_rating = st_star_rating("Ingresa la nueva calidad del evento", maxValue=5, defaultValue=event.rating, key="new_rating")
     
     if st.button("Guardar cambios"):
         gestion_controller.update_event(
-            event_type, 
-            event_name, 
-            name=new_name, 
-            date=str(new_date), 
+            event_type,
+            event_name,
+            name=new_name,
+            date=new_date,
             address=new_address,
             opening_time=new_opening_time,
             place_name=new_place_name,
             city=new_city,
+            rating=new_rating,
             description=new_description
         )
         st.success("¡Evento actualizado exitosamente!")
@@ -188,13 +198,14 @@ def modify_event_form(event, event_type, event_name):
         updated_event = gestion_controller.visualize_event(event_type, new_name)
         st.write("Detalles del evento actualizado:")
         st.write({
-            "Nombre": updated_event.name,
-            "Fecha": updated_event.date,
-            "Dirección": updated_event.address,
+            "Nombre": updated_event.event_name,
+            "Fecha": updated_event.event_date,
+            "Dirección": updated_event.event_address,
             "Hora de Apertura": updated_event.opening_time,
             "Nombre del Lugar": updated_event.place_name,
-            "Ciudad": updated_event.city,
-            "Descripción": updated_event.description if hasattr(updated_event, 'description') else ""
+            "Ciudad": updated_event.event_city,
+            "Descripción": updated_event.description if hasattr(updated_event, 'description') else "",
+            "Rating del Evento": updated_event.rating
         })
 
 def draw_view_all_events_page():
@@ -208,6 +219,9 @@ def draw_view_all_events_page():
         st.write(f"**Hora de Apertura:** {event.opening_time}")
         st.write(f"**Nombre del Establecimiento:** {event.place_name}")
         st.write(f"**Ciudad:** {event.event_city}")
+        st.write(f"**Rating for Event:** {event.rating}")
+        #Users can not change the amout of selected stars
+        st_star_rating(label = "Calidad Del Evento", maxValue = 5, defaultValue = event.rating, key = f"rating{event.event_name}", read_only = True )
         #st.write(f"**Capacidad Máxima:** {event.ticket_office.capacity}")
         #st.write(f"**Precio del Ticket:** {event.ticket_office.price:.2f}")
         st.write("---")

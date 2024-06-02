@@ -8,6 +8,21 @@
 - Juan David Niño Galvis
 - Juan David Tabares
 
+##### Version 0.1.0:
+
+- Se implementó el sistema de rating para calificar cada show con una estrella entre 1 y 5, además que estas propiedades ya se pueden modificar en la sección "Modificar evento"
+- Se Solucionaron los errores para graficar los eventos que eran creados en el calendar_mode que se encuentra al visualizar los eventos, se creo una función que convierte un objeto "Event" en un JSON que pueda leer el custom component
+- Se actualizo el requirements.txt con la nueva dependencia "st_star_rating"
+- Mejoras visuales en general de todo el proyecto
+- Se crearon algunos Eventos y Tickets por defecto para facilitar en la visualización del sistema, esto para la demo review proxima.
+
+##### Version 0.0.5:
+
+- Se implementó una vista para visualizar los eventos y los tickets que son creados temporalmente
+- Se solucionaron los errores al momento de crear un evento dependiendo del tipo elegido
+- se actualizó el requirements.txt con las nuevas dependencias necesitadas, ""pip install -r requirements.txt"
+- Implementó la compra de Ticket y exportacion de información como archivo PDF
+
 ##### Creación del Logo:
 
 Para la creación del logo para nuestra plataforma de comedia utilizamos una inteligencia artificial llamada "Leonardo AI" la cual nos da distintas posiblidades a elegir, y tomar la que más nos gusté.

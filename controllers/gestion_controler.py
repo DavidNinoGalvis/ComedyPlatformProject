@@ -19,21 +19,21 @@ class GestionController:
         self.tickets.append(ticket)
         return ticket
 
-    def create_event(self, selected_event_type, name, address, date, opening_time, place_name, city, ticket_office=None):
+    def create_event(self, selected_event_type, name, address, date, opening_time, place_name, city, rating, ticket_office=None):
         # Creación de TicketOffice para cada evento, si no se pasa uno existente
         ticket_office = ticket_office or TicketOffice()
 
         # Crear eventos basado en el tipo seleccionado
         if selected_event_type == "Evento Bar":
-            event = EventBar(name, address, date, opening_time, place_name, city, ticket_office)
+            event = EventBar(name, address, date, opening_time, place_name, city, rating, ticket_office)
             self.events_bar[name] = event
             self.event_data_base.append(event)
         elif selected_event_type == "Evento Filantropico":
-            event = EventPhilanthropic(name, address, date, opening_time, place_name, city, ticket_office)
+            event = EventPhilanthropic(name, address, date, opening_time, place_name, city, rating, ticket_office)
             self.events_philanthropic[name] = event
             self.event_data_base.append(event)
         elif selected_event_type == "Evento Teatro":
-            event = EventTheater(name, address, date, opening_time, place_name, city, ticket_office)
+            event = EventTheater(name, address, date, opening_time, place_name, city, rating, ticket_office)
             self.events_theater[name] = event
             self.event_data_base.append(event)
         else:
@@ -81,12 +81,26 @@ class GestionController:
     def update_event(self, selected_event_type, event_name, **kwargs):
         event = self.visualize_event(selected_event_type, event_name)
         if event:
+            old_name = event.event_name  # Guardar el nombre antiguo
             for key, value in kwargs.items():
                 if hasattr(event, key):
                     setattr(event, key, value)
+            new_name = kwargs.get('event_name', event.event_name)
+            if old_name != new_name:
+                if selected_event_type == "Bar":
+                    self.events_bar.pop(old_name)
+                    self.events_bar[new_name] = event
+                elif selected_event_type == "Philanthropic":
+                    self.events_philanthropic.pop(old_name)
+                    self.events_philanthropic[new_name] = event
+                elif selected_event_type == "Theater":
+                    self.events_theater.pop(old_name)
+                    self.events_theater[new_name] = event
+
             return event
         else:
             raise ValueError("Event not found")
+        
 
     def all_events(self):
         return self.event_data_base

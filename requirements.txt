@@ -1,5 +1,6 @@
 hydralit_components==1.0.10
+st_star_rating==0.0.6
 streamlit==1.35.0
 streamlit_calendar==1.2.0
 streamlit_lottie==0.0.5
-streamlit_option_menu==0.3.12
+streamlit_option_menu==0.3.13
