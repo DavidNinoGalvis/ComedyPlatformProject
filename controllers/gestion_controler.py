@@ -19,21 +19,18 @@ class GestionController:
         self.tickets.append(ticket)
         return ticket
 
-    def create_event(self, selected_event_type, name, address, date, opening_time, place_name, city, rating, ticket_office=None):
-        # Creación de TicketOffice para cada evento, si no se pasa uno existente
-        ticket_office = ticket_office or TicketOffice()
-
+    def create_event(self, selected_event_type, name, address, date, opening_time, place_name, city, rating, ticket_price):
         # Crear eventos basado en el tipo seleccionado
         if selected_event_type == "Evento Bar":
-            event = EventBar(name, address, date, opening_time, place_name, city, rating, ticket_office)
+            event = EventBar(name, address, date, opening_time, place_name, city, rating, ticket_price)
             self.events_bar[name] = event
             self.event_data_base.append(event)
         elif selected_event_type == "Evento Filantropico":
-            event = EventPhilanthropic(name, address, date, opening_time, place_name, city, rating, ticket_office)
+            event = EventPhilanthropic(name, address, date, opening_time, place_name, city, rating, ticket_price)
             self.events_philanthropic[name] = event
             self.event_data_base.append(event)
         elif selected_event_type == "Evento Teatro":
-            event = EventTheater(name, address, date, opening_time, place_name, city, rating, ticket_office)
+            event = EventTheater(name, address, date, opening_time, place_name, city, rating, ticket_price)
             self.events_theater[name] = event
             self.event_data_base.append(event)
         else:

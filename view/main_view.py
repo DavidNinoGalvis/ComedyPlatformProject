@@ -5,14 +5,15 @@ from datetime import datetime, timedelta
 from controllers.gestion_controler import GestionController
 import time
 from streamlit_star_rating import st_star_rating
+import random # para el codigo de las boletas
 
 # Clase que almacenara la informacion totales
 gestion_controller = GestionController()
 
-gestion_controller.create_event("Evento Bar", "Remate de Fin de año", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y",4 ,"ticket office")
+gestion_controller.create_event("Evento Bar", "Remate de Fin de año", "Dirección 1", "2024-06-01", "18:00", "Bar X", "Ciudad Y",4 ,4)
 # Ejemplo de evento para la sustentación
-test = gestion_controller.create_event("Evento Filantropico", "Ultimatum de Comedia", "Dirección 2", "2024-06-23", "19:00", "Teatro Z", "Ciudad W", 5, "ticket office")
-gestion_controller.create_event("Evento Teatro", "Fucks News Noticreo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B", 2, "ticket office")
+test = gestion_controller.create_event("Evento Filantropico", "Ultimatum de Comedia", "Cra", "2024-06-23", "19:00", "Teatro Z", "Ciudad W", 5, 2)
+gestion_controller.create_event("Evento Teatro", "Fucks News Noticreo", "Dirección 3", "2024-08-20", "20:00", "Estadio A", "Ciudad B", 2, 11)
 
 
 calendar_events = [
@@ -62,12 +63,20 @@ def draw_buy_ticket_page():
         client_last_names = st.text_input("Apellidos", placeholder="Last name")
         price_ticket = st.number_input("Precio del Ticket", placeholder="Ticket Price")
         buyer_id = [client_names, client_last_names]
-        category = st.text_input("Categoría", placeholder="Category")
-        phase = st.text_input("Fase", placeholder="Phase")
-        sale_code = st.text_input("Código de Venta", placeholder="Sale Code")
-        payment_method = st.text_input("Método de Pago", placeholder="Payment Method")
-        refund_method = st.text_input("Método de Reembolso", placeholder="Refund Method")
-        #is_active = True  # Asumimos que el ticket está activo por defecto
+        # Obtener la lista de eventos disponibles
+        all_events = gestion_controller.all_events()
+        event_names = [event.event_name for event in all_events]
+        
+        category = st.selectbox("Categoría", options=event_names)
+        phase = st.selectbox("Fase", options=["Pre-venta", "Venta", "Post-Venta"])
+        
+        # Generar un código de venta aleatorio de 6 dígitos
+        default_sale_code = f"{random.randint(100000, 999999)}"
+        sale_code = st.text_input("Código de Venta", value=default_sale_code)
+        st.write(f"El codigo de Boleta generado fue: {sale_code}")
+        
+        payment_method = st.selectbox("Método de Pago", options=["Tarjeta de Crédito", "PayPal", "Transferencia Bancaria", "Efectivo"])
+        refund_method = st.selectbox("Método de Reembolso", options=["Tarjeta de Crédito", "PayPal", "Transferencia Bancaria", "Efectivo"])
 
         buy_ticket_button = st.form_submit_button("Comprar Boleta")
     
@@ -96,6 +105,13 @@ def draw_create_event_page():
         ]
         st.write("Selecciona el tipo de evento")
         option_event = hc.option_bar(option_definition=option_data, key='PrimaryOption', horizontal_orientation=True)
+        cc = st.columns(3)
+        with cc[0]:
+            st.image("static/event-bar.webp", width=450)
+        with cc[1]:
+            st.image("static/event-teatro.webp", width=450)
+        with cc[2]:
+            st.image("static/event-filantropic.webp", width=450)
 
         address = st.text_input("Dirección Del Evento", placeholder="Enter event address")
         date = st.date_input("Fecha del Evento", value=datetime.today())
@@ -208,24 +224,25 @@ def modify_event_form(event, event_type, event_name):
             "Rating del Evento": updated_event.rating
         })
 
+
+def display_event(event):
+    st.subheader(event.event_name)
+    st.write(f"**Tipo de Evento:** {event.__class__.__name__}")
+    st.write(f"**Dirección:** {event.event_address}")
+    st.write(f"**Fecha:** {event.event_date}")
+    st.write(f"**Hora de Apertura:** {event.opening_time}")
+    st.write(f"**Nombre del Establecimiento:** {event.place_name}")
+    st.write(f"**Ciudad:** {event.event_city}")
+    st.write(f"**Rating for Event:** {event.rating}")
+    #Users can not change the amout of selected stars
+    st_star_rating(label = "Calidad Del Evento", maxValue = 5, defaultValue = event.rating, key = f"rating{event.event_name}", read_only = True )
+    hc.progress_bar(event.ticket_office,'Capacidad de Boletas Vendidas', key=f"key{event.event_name}")
+    #st.write(f"**Capacidad Máxima:** {event.ticket_office.capacity}")
+    #st.write(f"**Precio del Ticket:** {event.ticket_office.price:.2f}")
+    st.write("---")
+
 def draw_view_all_events_page():
     st.title("Todos los Eventos")
-    
-    def display_event(event):
-        st.subheader(event.event_name)
-        st.write(f"**Tipo de Evento:** {event.__class__.__name__}")
-        st.write(f"**Dirección:** {event.event_address}")
-        st.write(f"**Fecha:** {event.event_date}")
-        st.write(f"**Hora de Apertura:** {event.opening_time}")
-        st.write(f"**Nombre del Establecimiento:** {event.place_name}")
-        st.write(f"**Ciudad:** {event.event_city}")
-        st.write(f"**Rating for Event:** {event.rating}")
-        #Users can not change the amout of selected stars
-        st_star_rating(label = "Calidad Del Evento", maxValue = 5, defaultValue = event.rating, key = f"rating{event.event_name}", read_only = True )
-        #st.write(f"**Capacidad Máxima:** {event.ticket_office.capacity}")
-        #st.write(f"**Precio del Ticket:** {event.ticket_office.price:.2f}")
-        st.write("---")
-    
     def display_ticket(ticket):
         st.subheader(f"Ticket ID: {ticket.buyerID}")
         st.write(f"**Precio:** {ticket.price}")
@@ -308,7 +325,8 @@ def draw_home_page():
         st.markdown("### ¡Conoce Nuestras Redes Sociales!")
         sub_columns = st.columns(4)
         with sub_columns[0]:
-            st.link_button("instagram", "https://www.instagram.com/")
+            st.button("Instagram", key="button_instagram")
+            #st.link_button("instagram", "https://www.instagram.com/")
         with sub_columns[1]:
             st.button("Facebook", key="button_facebook")
         with sub_columns[2]:
@@ -329,7 +347,13 @@ def draw_consult_event_page():
         nombre = st.text_input("Nombre del Evento:", placeholder="Event Name")
         search_button = st.button("Buscar", key="searchButton")
         if search_button:
-            st.info("test")
+            all_events = gestion_controller.event_data_base  # Método que asume que retorna todos los eventos
+        
+            if all_events:
+                for event in all_events:
+                    display_event(event)
+        else:
+            st.info("No hay eventos disponibles para mostrar.")
     with cc[1]:
         st.markdown("<p>   </p>", unsafe_allow_html=True)
     with cc[2]:
@@ -374,6 +398,12 @@ def draw_consult_event_page():
         st.write(calendar1)
 
 #----------------------------------------------------------------------------------------------------------------------------------------
+
+def draw_dashboard_page():
+    st.title("Sección de DashBoard")
+    st.write("Prueba Prueba")
+
+#----------------------------------------------------------------------------------------------------------------------------------------
 # Sección para consultar los reportes de ventas
 def draw_consult_report_page():
     st.title("Sección Para consultar los reportes de ventas")
@@ -403,7 +433,8 @@ def draw_main_view():
         {'icon': "fa fa-plus-circle", 'label': "Crear Evento"},
         {'icon': "fa fa-edit", 'label': "Modificar Evento"},
         {'icon': "fa fa-chart-line", 'label': "Consultar Reportes"},
-        {'icon': "fa fa-chart-line", 'label': "Test - Events"}
+        {'icon': "fa fa-chart-line", 'label': "Test - Events"},
+        {'icon': "fa fa-chart-line", 'label': "Dashboard"}
     ]
 
     # Configurar el tema de la barra de navegación
@@ -434,3 +465,5 @@ def draw_main_view():
         pass
     elif (menu_id == "Test - Events"):
         draw_view_all_events_page()
+    elif (menu_id == "Dashboard"):
+        draw_dashboard_page()

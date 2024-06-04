@@ -6,7 +6,6 @@ class GUIController:
         self.run_page = 'main'
         self.gestion_controler = GestionController()
 
-
     def main(self):
         if self.run_page == 'main':
             #main_admin()
